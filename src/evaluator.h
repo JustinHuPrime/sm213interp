@@ -17,10 +17,13 @@
 
 #include "memory.h"
 
+#include <initializer_list>
+
 namespace model {
 namespace {
 using model::Memory;
-}
+using std::initializer_list;
+}  // namespace
 
 class IllegalInstruction : public exception {
  public:
@@ -32,4 +35,7 @@ class IllegalInstruction : public exception {
 };
 
 void run(Memory& ram);
+
+void checkRegisters(initializer_list<uint8_t>, int32_t);
+uint8_t combineNibbles(uint8_t, uint8_t) noexcept;
 }  // namespace model

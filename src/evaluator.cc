@@ -18,13 +18,11 @@
 #include "evaluator.h"
 
 #include <array>
-#include <initializer_list>
 #include <sstream>
 
 namespace model {
 namespace {
 using std::array;
-using std::initializer_list;
 using std::stringstream;
 using std::to_string;
 }  // namespace
@@ -36,20 +34,6 @@ IllegalInstruction::IllegalInstruction(int32_t addr) noexcept {
   msg = "Attempted to execute illegal instruction at " + sstream.str() + ".";
 }
 const char* IllegalInstruction::what() const noexcept { return msg.c_str(); }
-
-void checkRegisters(initializer_list<uint8_t> registers, int32_t currPC) {
-  for (uint8_t iter : registers) {
-    if (iter > 7) throw IllegalInstruction(currPC - 2);
-  }
-}
-
-uint8_t combineNibbles(uint8_t nibble1, uint8_t nibble2) {
-  uint8_t temp = 0;
-  temp |= nibble1;
-  temp <<= 4;
-  temp |= nibble2;
-  return temp;
-}
 
 void run(Memory& ram) {
   int32_t pc = 0;
@@ -194,5 +178,19 @@ void run(Memory& ram) {
       default: { abort(); }  // something is horribly wrong!
     }
   }
+}
+
+void checkRegisters(initializer_list<uint8_t> registers, int32_t currPC) {
+  for (uint8_t iter : registers) {
+    if (iter > 7) throw IllegalInstruction(currPC - 2);
+  }
+}
+
+uint8_t combineNibbles(uint8_t nibble1, uint8_t nibble2) noexcept {
+  uint8_t temp = 0;
+  temp |= nibble1;
+  temp <<= 4;
+  temp |= nibble2;
+  return temp;
 }
 }  // namespace model
