@@ -24,7 +24,6 @@
 #include "model/evaluator.h"
 #include "model/memory.h"
 
-#include <fstream>
 #include <iostream>
 #include <stdexcept>
 
@@ -42,7 +41,7 @@ using std::string;
 
 int main(int argc, char* argv[]) {
   if (argc != 2) {
-    cerr << "Warning: memory size (in bytes) as only argument.\n";
+    cerr << "Expected memory size (in bytes) as only argument.\n";
     return EXIT_FAILURE;
   }
 

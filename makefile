@@ -13,7 +13,7 @@
 # Public License for more details.
 #
 # You should have received a copy of the GNU General Public License along with
-# the SM213 interpreter.  If not, see <https:#www.gnu.org/licenses/>.
+# the SM213 interpreter.  If not, see <https://www.gnu.org/licenses/>.
 
 #command options
 CC := g++
