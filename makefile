@@ -9,11 +9,11 @@
 #
 # The SM213 interpreter is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
 # Public License for more details.
 #
 # You should have received a copy of the GNU General Public License along with
-# the SM213 interpreter. If not, see <https:#www.gnu.org/licenses/>.
+# the SM213 interpreter.  If not, see <https:#www.gnu.org/licenses/>.
 
 #command options
 CC := g++
