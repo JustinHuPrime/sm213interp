@@ -57,10 +57,10 @@ void Memory::setn(int32_t data, int32_t location) {
   if (location + 4 >= arenaSize) {
     throw Segfault(location);
   } else {
-    arena[location + 0] = (data >> 0 * 8) & 0xff;
-    arena[location + 1] = (data >> 1 * 8) & 0xff;
-    arena[location + 2] = (data >> 2 * 8) & 0xff;
-    arena[location + 3] = (data >> 3 * 8) & 0xff;
+    arena[location + 0] = (data >> 3 * 8) & 0xff;
+    arena[location + 1] = (data >> 2 * 8) & 0xff;
+    arena[location + 2] = (data >> 1 * 8) & 0xff;
+    arena[location + 3] = (data >> 0 * 8) & 0xff;
   }
 }
 

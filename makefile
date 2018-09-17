@@ -32,17 +32,6 @@ DEPDIR := dependencies
 DEPS := $(patsubst $(SRCDIR)/%.cc,$(DEPDIR)/%.dep,$(SRCS))
 
 
-#Test file options
-TSRCDIR := tests
-TSRCS := $(shell find -O3 $(TSRCDIR)/ -type f -name '*.cc')
-
-TOBJDIR := tests/bin
-TOBJS := $(patsubst $(TSRCDIR)/%.cc,$(TOBJDIR)/%.o,$(TSRCS))
-
-TDEPDIR := tests/dependencies
-TDEPS := $(patsubst $(TSRCDIR)/%.cc,$(TDEPDIR)/%.dep,$(TSRCS))
-
-
 #compiler configuration
 GPPWARNINGS := -Wlogical-op -Wuseless-cast -Wnoexcept -Wstrict-null-sentinel
 WARNINGS := -pedantic -pedantic-errors -Wall -Wextra $(GPPWARNINGS) -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-overflow=5 -Wswitch-default -Wundef -Wzero-as-null-pointer-constant -Wno-unused
@@ -56,11 +45,9 @@ RELEASEOPTIONS := -Os -Wunused
 #libraries and included files
 LIBS := $(shell pkg-config --libs ncurses)
 INCLUDES := -I$(SRCDIR)
-TINCLUDES := -I$(TSRCDIR)
 
 #final executable name
 EXENAME := sm213interp
-TEXENAME := sm213interpTest
 
 
 .PHONY: debug release clean diagnose
@@ -68,27 +55,21 @@ TEXENAME := sm213interpTest
 
 
 debug: OPTIONS := $(OPTIONS) $(DEBUGOPTIONS)
-debug: $(EXENAME) $(TEXENAME)
+debug: $(EXENAME)
 	@echo "Done compiling debug."
-	@echo "Running tests."
 	@echo ""
-	@./$(TEXENAME)
 	@echo "Debug build finished."
 
 release: OPTIONS := $(OPTIONS) $(RELEASEOPTIONS)
-release: $(EXENAME) $(TEXENAME)
+release: $(EXENAME)
 	@echo "Done with release."
-	@echo "Running tests."
 	@echo ""
-	@./$(TEXENAME)
 	@echo "Release build finished."
 
 
 clean:
 	@echo "Removing $(DEPDIR)/, $(OBJDIR)/, and $(EXENAME)"
 	@$(RM) $(OBJDIR) $(DEPDIR) $(EXENAME)
-	@echo "Removing $(TDEPDIR)/, $(TOBJDIR)/, and $(TEXENAME)"
-	@$(RM) $(TOBJDIR) $(TDEPDIR) $(TEXENAME)
 
 
 $(EXENAME): $(OBJS)
@@ -107,24 +88,8 @@ $(DEPS): $$(patsubst $(DEPDIR)/%.dep,$(SRCDIR)/%.cc,$$@) | $$(dir $$@)
 	 rm -f $@.$$$$
 
 
-$(TEXENAME): $(TOBJS) $(OBJS)
-	@echo "Linking test..."
-	@$(CC) -o $(TEXENAME) $(OPTIONS) $(filter-out %main.o,$(OBJS)) $(TOBJS) $(LIBS)
-
-$(TOBJS): $$(patsubst $(TOBJDIR)/%.o,$(TSRCDIR)/%.cc,$$@) $$(patsubst $(TOBJDIR)/%.o,$(TDEPDIR)/%.dep,$$@) | $$(dir $$@)
-	@echo "Compiling $@..."
-	@clang-format -i $(filter-out %.dep,$^)
-	@$(CC) $(OPTIONS) $(INCLUDES) $(TINCLUDES) -c $< -o $@
-
-$(TDEPS): $$(patsubst $(TDEPDIR)/%.dep,$(TSRCDIR)/%.cc,$$@) | $$(dir $$@)
-	@set -e; $(RM) $@; \
-	 $(CC) $(OPTIONS) $(INCLUDES) $(TINCLUDES) -MM -MT $(patsubst $(TDEPDIR)/%.dep,$(TOBJDIR)/%.o,$@) $< > $@.$$$$; \
-	 sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	 rm -f $@.$$$$
-
-
 %/:
 	@$(MKDIR) $@
 
 
--include $(DEPS) $(TDEPS)
+-include $(DEPS)
