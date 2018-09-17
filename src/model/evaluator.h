@@ -15,46 +15,34 @@
 // You should have received a copy of the GNU General Public License along with
 // the SM213 interpreter.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef SM213INTERPRETER_MODEL_MEMORY_H_
-#define SM213INTERPRETER_MODEL_MEMORY_H_
+#ifndef SM213INTERP_MODEL_EVALUATOR_H_
+#define SM213INTERP_MODEL_EVALUATOR_H_
 
-#include <cstdint>
-#include <iterator>
-#include <stdexcept>
-#include <string>
+#include "model/memory.h"
 
-namespace model {
+#include <initializer_list>
+
+namespace sm213interp::model {
 namespace {
+using sm213common::model::Memory;
 using std::exception;
+using std::initializer_list;
 using std::string;
 }  // namespace
 
-class Segfault : public exception {
+class IllegalInstruction : public exception {
  public:
-  Segfault(int32_t attemptLocation) noexcept;
+  IllegalInstruction(int32_t addr) noexcept;
   const char* what() const noexcept override;
 
- private:
+ protected:
   string msg;
 };
 
-class Memory {
- public:
-  explicit Memory(int32_t size) noexcept;
-  ~Memory() noexcept;
+void run(Memory& ram);
 
-  uint8_t get(int32_t);
-  void set(uint8_t data, int32_t location);
-  int32_t getn(int32_t);
-  void setn(int32_t data, int32_t location);
+void checkRegisters(initializer_list<uint8_t>, int32_t);
+uint8_t combineNibbles(uint8_t, uint8_t) noexcept;
+}  // namespace sm213interp::model
 
-  int32_t size() const noexcept;
-  const char* c_str_rep() const noexcept;
-
- private:
-  uint8_t* arena;
-  int32_t arenaSize;
-};
-}  // namespace model
-
-#endif  // SM213INTERPRETER_MODEL_MEMORY_H_
+#endif  // SM213INTERP_MODEL_EVALUATOR_H_

@@ -15,27 +15,20 @@
 // You should have received a copy of the GNU General Public License along with
 // the SM213 interpreter.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "io.h"
+#ifndef SM213INTERP_IO_IO_H_
+#define SM213INTERP_IO_IO_H_
 
-#include <iostream>
+#include "model/memory.h"
 
-namespace io {
+namespace sm213interp::io {
 namespace {
-using model::Segfault;
-using std::cin;
-using std::cout;
-}  // namespace
-void read(Memory& ram) {
-  char c;
-  int32_t curr = 0;
-  while (cin.get(c)) {
-    if (curr >= ram.size())
-      throw Segfault(curr);
-    else
-      ram.set(static_cast<uint8_t>(c), curr++);
-  }
+using sm213common::model::Memory;
 }
-void dump(const Memory& ram) noexcept {
-  cout.write(ram.c_str_rep(), ram.size()).flush();
-}
-}  // namespace io
+
+// takes stdin as raw data
+void read(Memory& ram);
+// outputs ram to stdout as raw data
+void dump(const Memory& ram) noexcept;
+}  // namespace sm213interp::io
+
+#endif  // SM213INTERP_IO_IO_H_

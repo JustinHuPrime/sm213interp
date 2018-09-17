@@ -15,27 +15,46 @@
 // You should have received a copy of the GNU General Public License along with
 // the SM213 interpreter.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "memory.h"
+#ifndef SM213COMMON_MODEL_MEMORY_H_
+#define SM213COMMON_MODEL_MEMORY_H_
 
-#include <initializer_list>
+#include <cstdint>
+#include <iterator>
+#include <stdexcept>
+#include <string>
 
-namespace model {
+namespace sm213common::model {
 namespace {
-using model::Memory;
-using std::initializer_list;
+using std::exception;
+using std::string;
 }  // namespace
 
-class IllegalInstruction : public exception {
+class Segfault : public exception {
  public:
-  IllegalInstruction(int32_t addr) noexcept;
+  Segfault(int32_t attemptLocation) noexcept;
   const char* what() const noexcept override;
 
- protected:
+ private:
   string msg;
 };
 
-void run(Memory& ram);
+class Memory {
+ public:
+  explicit Memory(int32_t size) noexcept;
+  ~Memory() noexcept;
 
-void checkRegisters(initializer_list<uint8_t>, int32_t);
-uint8_t combineNibbles(uint8_t, uint8_t) noexcept;
-}  // namespace model
+  uint8_t get(int32_t);
+  void set(uint8_t data, int32_t location);
+  int32_t getn(int32_t);
+  void setn(int32_t data, int32_t location);
+
+  int32_t size() const noexcept;
+  const char* c_str_rep() const noexcept;
+
+ private:
+  uint8_t* arena;
+  int32_t arenaSize;
+};
+}  // namespace sm213common::model
+
+#endif  // SM213COMMON_MODEL_MEMORY_H_

@@ -20,20 +20,20 @@
 // standard input, passed through the assembler into machine code (in simulated
 // memory), then executed.
 
-#include "evaluator.h"
-#include "io.h"
-#include "memory.h"
+#include "io/io.h"
+#include "model/evaluator.h"
+#include "model/memory.h"
 
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
 
 namespace {
-using io::dump;
-using io::read;
-using model::Memory;
-using model::run;
-using model::Segfault;
+using sm213common::model::Memory;
+using sm213common::model::Segfault;
+using sm213interp::io::dump;
+using sm213interp::io::read;
+using sm213interp::model::run;
 using std::cerr;
 using std::invalid_argument;
 using std::stoi;

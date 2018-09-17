@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU General Public License along with
 // the SM213 interpreter.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "memory.h"
+#include "model/memory.h"
 
 #include <stdexcept>
 
-namespace model {
+namespace sm213common::model {
 namespace {
 using std::invalid_argument;
 using std::max;
@@ -69,4 +69,4 @@ int32_t Memory::size() const noexcept { return arenaSize; }
 const char* Memory::c_str_rep() const noexcept {
   return reinterpret_cast<char*>(arena);
 }
-}  // namespace model
+}  // namespace sm213common::model

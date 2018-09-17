@@ -15,12 +15,12 @@
 // You should have received a copy of the GNU General Public License along with
 // the SM213 interpreter.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "evaluator.h"
+#include "model/evaluator.h"
 
 #include <array>
 #include <sstream>
 
-namespace model {
+namespace sm213interp::model {
 namespace {
 using std::array;
 using std::stringstream;
@@ -193,4 +193,4 @@ uint8_t combineNibbles(uint8_t nibble1, uint8_t nibble2) noexcept {
   temp |= nibble2;
   return temp;
 }
-}  // namespace model
+}  // namespace sm213interp::model
