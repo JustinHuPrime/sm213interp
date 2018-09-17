@@ -22,5 +22,14 @@ namespace {
 using model::Memory;
 }
 
+class IllegalInstruction : public exception {
+ public:
+  IllegalInstruction(int32_t addr) noexcept;
+  const char* what() const noexcept override;
+
+ protected:
+  string msg;
+};
+
 void run(Memory& ram);
 }  // namespace model

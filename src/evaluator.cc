@@ -18,76 +18,181 @@
 #include "evaluator.h"
 
 #include <array>
+#include <initializer_list>
+#include <sstream>
 
 namespace model {
 namespace {
 using std::array;
+using std::initializer_list;
+using std::stringstream;
+using std::to_string;
+}  // namespace
+
+IllegalInstruction::IllegalInstruction(int32_t addr) noexcept {
+  stringstream sstream;
+  sstream << std::hex << addr;
+
+  msg = "Attempted to execute illegal instruction at " + sstream.str() + ".";
 }
+const char* IllegalInstruction::what() const noexcept { return msg.c_str(); }
+
+void checkRegisters(initializer_list<uint8_t> registers, int32_t currPC) {
+  for (uint8_t iter : registers) {
+    if (iter > 7) throw IllegalInstruction(currPC - 2);
+  }
+}
+
+uint8_t combineNibbles(uint8_t nibble1, uint8_t nibble2) {
+  uint8_t temp = 0;
+  temp |= nibble1;
+  temp <<= 4;
+  temp |= nibble2;
+  return temp;
+}
+
 void run(Memory& ram) {
   int32_t pc = 0;
   array<int32_t, 8> registers;
 
   while (true) {
-    uint16_t opCode = ram.get(pc);
+    uint16_t opCode = ram.get(pc++);
     opCode <<= 8;
-    opCode |= ram.get(pc + 1);
+    opCode |= ram.get(pc++);
     uint8_t opCode0 = (opCode >> 3 * 4) & 0xf;
     uint8_t opCode1 = (opCode >> 2 * 4) & 0xf;
     uint8_t opCode2 = (opCode >> 1 * 4) & 0xf;
     uint8_t opCode3 = (opCode >> 0 * 4) & 0xf;
 
+    // pc gets updated before any instructions are evaluated.
+
     switch (opCode0) {
-      case 0x0: {
+      case 0x0: {  // load immediate
+        checkRegisters({opCode1}, pc);
+        registers[opCode1] = ram.getn(pc);
+        pc += 4;
         break;
       }
-      case 0x1: {
+      case 0x1: {  // load base+offset
+        checkRegisters({opCode2, opCode3}, pc);
+        registers[opCode3] = ram.getn(opCode1 * 4 + registers[opCode2]);
         break;
       }
-      case 0x2: {
+      case 0x2: {  // load indexed
+        checkRegisters({opCode1, opCode2, opCode3}, pc);
+        registers[opCode3] =
+            ram.getn(registers[opCode1] + registers[opCode2] * 4);
         break;
       }
-      case 0x3: {
+      case 0x3: {  // store base + offset
+        checkRegisters({opCode1, opCode3}, pc);
+        ram.setn(registers[opCode1], opCode2 * 4 + registers[opCode3]);
         break;
       }
-      case 0x4: {
+      case 0x4: {  // store indexed
+        checkRegisters({opCode1, opCode2, opCode3}, pc);
+        ram.setn(registers[opCode1],
+                 registers[opCode2] + registers[opCode3] * 4);
         break;
       }
-      case 0x5: {
+      case 0x5: {  // nothing starts with 5!
+        throw IllegalInstruction(pc - 2);
+      }
+      case 0x6: {  // arithmetic
+        checkRegisters({opCode3}, pc);
+        switch (opCode1) {
+          case 0x0: {  // assignment
+            checkRegisters({opCode2}, pc);
+            registers[opCode3] = registers[opCode2];
+            break;
+          }
+          case 0x1: {  // addition
+            checkRegisters({opCode2}, pc);
+            registers[opCode3] += registers[opCode2];
+            break;
+          }
+          case 0x2: {  // bitwise and
+            checkRegisters({opCode2}, pc);
+            registers[opCode3] &= registers[opCode2];
+            break;
+          }
+          case 0x3: {  // increment
+            registers[opCode3] += 1;
+            break;
+          }
+          case 0x4: {  // increment by 4
+            registers[opCode3] += 4;
+            break;
+          }
+          case 0x5: {  // decrement
+            registers[opCode3] -= 1;
+            break;
+          }
+          case 0x6: {  // decrement by 4
+            registers[opCode3] -= 4;
+            break;
+          }
+          case 0x7: {  // bitwise not
+            registers[opCode3] = ~registers[opCode3];
+            break;
+          }
+          case 0xf: {  // get pc
+            registers[opCode3] = pc + 2 * opCode2;
+            break;
+          }
+          default: { throw IllegalInstruction(pc - 2); }
+        }
         break;
       }
-      case 0x6: {
+      case 0x7: {  // shift
+        checkRegisters({opCode1}, pc);
+        registers[opCode1] <<= combineNibbles(opCode2, opCode3);
         break;
       }
-      case 0x7: {
+      case 0x8: {  // branch
+        pc += 2 * combineNibbles(opCode2, opCode3);
         break;
       }
-      case 0x8: {
+      case 0x9: {  // branch if equal
+        checkRegisters({opCode1}, pc);
+        if (registers[opCode1] == 0) pc += 2 * combineNibbles(opCode2, opCode3);
         break;
       }
-      case 0x9: {
+      case 0xa: {  // branch if greater
+        checkRegisters({opCode1}, pc);
+        if (registers[opCode1] > 0) pc += 2 * combineNibbles(opCode2, opCode3);
         break;
       }
-      case 0xa: {
+      case 0xb: {  // unconditional jump
+        pc = ram.getn(pc);
         break;
       }
-      case 0xb: {
-        break;
-      }
-      case 0xc: {
+      case 0xc: {  // jump indirect
+        checkRegisters({opCode1}, pc);
+        pc = registers[opCode1] + 2 * combineNibbles(opCode2, opCode3);
         break;
       }
       case 0xd: {
+        checkRegisters({opCode1}, pc);
+        pc = ram.get(combineNibbles(opCode2, opCode3) + registers[opCode1]);
         break;
       }
       case 0xe: {
+        checkRegisters({opCode1, opCode2}, pc);
+        pc = ram.get(4 * registers[opCode1] + registers[opCode2]);
         break;
       }
       case 0xf: {
-        break;
+        if (opCode2 != 0 || opCode3 != 0) throw IllegalInstruction(pc - 2);
+        if (opCode1 == 0x0)  // halt
+          return;
+        else if (opCode1 == 0xf)  // nop
+          break;
+        else
+          throw IllegalInstruction(pc - 2);
       }
+      default: { abort(); }  // something is horribly wrong!
     }
-
-    pc += 2;
   }
 }
 }  // namespace model
