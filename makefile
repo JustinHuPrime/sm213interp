@@ -23,7 +23,7 @@ MKDIR := mkdir -p
 
 #File options
 SRCDIR := src
-SRCS := $(shell find -O3 $(SRCDIR)/ -type f -name '*.cc')
+SRCS := $(shell find -L -O3 $(SRCDIR)/ -type f -name '*.cc')
 
 OBJDIR := bin
 OBJS := $(patsubst $(SRCDIR)/%.cc,$(OBJDIR)/%.o,$(SRCS))
