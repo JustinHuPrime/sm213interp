@@ -9,28 +9,40 @@
 //
 // The SM213 interpreter is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
 // Public License for more details.
 //
 // You should have received a copy of the GNU General Public License along with
-// the StackLang interpreter. If not, see <https://www.gnu.org/licenses/>.
+// the SM213 interpreter.  If not, see <https://www.gnu.org/licenses/>.
+
+// SM213 interpreter takes one command line argument - memory size in bytes,
+// then generates a memory area of that size. The program is then read in from
+// standard input, passed through the assembler into machine code (in simulated
+// memory), then executed.
+
+#include "evaluator.h"
+#include "io.h"
+#include "memory.h"
 
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
 
 namespace {
+using io::dump;
+using io::read;
+using model::Memory;
+using model::run;
+using model::Segfault;
 using std::cerr;
-using std::endl;
+using std::invalid_argument;
 using std::stoi;
 using std::string;
-// using std::cout;
-using std::invalid_argument;
 }  // namespace
 
 int main(int argc, char* argv[]) {
   if (argc != 2) {
-    cerr << "Warning: expected memory size (in bytes) as only argument.\n";
+    cerr << "Warning: memory size (in bytes) as only argument.\n";
     return EXIT_FAILURE;
   }
 
@@ -42,7 +54,23 @@ int main(int argc, char* argv[]) {
   } catch (const invalid_argument&) {
     cerr << "Expected memory size to be a valid and positive integer. Found `"
          << argv[1] << "` instead.\n";
+    return EXIT_FAILURE;
   }
+
+  Memory ram(memsize);
+
+  try {
+    read(ram);
+  } catch (const Segfault&) {
+    cerr << "Input too long - out of memory.\n";
+    return EXIT_FAILURE;
+  }
+  try {
+    run(ram);
+  } catch (const Segfault& e) {
+    cerr << e.what() << "\n";
+  }
+  dump(ram);
 
   return EXIT_SUCCESS;
 }
