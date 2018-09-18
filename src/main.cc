@@ -25,6 +25,7 @@
 #include "model/memory.h"
 
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 
 namespace {
@@ -35,7 +36,8 @@ using sm213interp::io::read;
 using sm213interp::model::run;
 using std::cerr;
 using std::invalid_argument;
-using std::stoi;
+using std::numeric_limits;
+using std::stoul;
 using std::string;
 }  // namespace
 
@@ -45,11 +47,13 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
 
-  int32_t memsize;
+  unsigned long buffer;
+  uint32_t memsize;
 
   try {
-    memsize = stoi(string(argv[1]));
-    if (memsize <= 0) throw invalid_argument("");
+    buffer = stoul(string(argv[1]));
+    if (memsize > numeric_limits<uint32_t>().max()) throw invalid_argument("");
+    memsize = static_cast<uint32_t>(buffer);
   } catch (const invalid_argument&) {
     cerr << "Expected memory size to be a valid and positive integer. Found `"
          << argv[1] << "` instead.\n";

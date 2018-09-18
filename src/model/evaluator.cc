@@ -27,7 +27,7 @@ using std::stringstream;
 using std::to_string;
 }  // namespace
 
-IllegalInstruction::IllegalInstruction(int32_t addr) noexcept {
+IllegalInstruction::IllegalInstruction(uint32_t addr) noexcept {
   stringstream sstream;
   sstream << std::hex << addr;
 
@@ -36,7 +36,7 @@ IllegalInstruction::IllegalInstruction(int32_t addr) noexcept {
 const char* IllegalInstruction::what() const noexcept { return msg.c_str(); }
 
 void run(Memory& ram) {
-  int32_t pc = 0;
+  uint32_t pc = 0;
   array<int32_t, 8> registers;
 
   while (true) {
@@ -59,24 +59,28 @@ void run(Memory& ram) {
       }
       case 0x1: {  // load base+offset
         checkRegisters({opCode2, opCode3}, pc);
-        registers[opCode3] = ram.getn(opCode1 * 4 + registers[opCode2]);
+        registers[opCode3] =
+            ram.getn(opCode1 * 4U + static_cast<uint32_t>(registers[opCode2]));
         break;
       }
       case 0x2: {  // load indexed
         checkRegisters({opCode1, opCode2, opCode3}, pc);
         registers[opCode3] =
-            ram.getn(registers[opCode1] + registers[opCode2] * 4);
+            ram.getn(static_cast<uint32_t>(registers[opCode1]) +
+                     static_cast<uint32_t>(registers[opCode2]) * 4U);
         break;
       }
       case 0x3: {  // store base + offset
         checkRegisters({opCode1, opCode3}, pc);
-        ram.setn(registers[opCode1], opCode2 * 4 + registers[opCode3]);
+        ram.setn(registers[opCode1],
+                 opCode2 * 4U + static_cast<uint32_t>(registers[opCode3]));
         break;
       }
       case 0x4: {  // store indexed
         checkRegisters({opCode1, opCode2, opCode3}, pc);
         ram.setn(registers[opCode1],
-                 registers[opCode2] + registers[opCode3] * 4);
+                 static_cast<uint32_t>(registers[opCode2]) +
+                     static_cast<uint32_t>(registers[opCode3]) * 4U);
         break;
       }
       case 0x5: {  // nothing starts with 5!
@@ -121,7 +125,7 @@ void run(Memory& ram) {
             break;
           }
           case 0xf: {  // get pc
-            registers[opCode3] = pc + 2 * opCode2;
+            registers[opCode3] = static_cast<int32_t>(pc + 2U * opCode2);
             break;
           }
           default: { throw IllegalInstruction(pc - 2); }
@@ -139,36 +143,40 @@ void run(Memory& ram) {
         break;
       }
       case 0x8: {  // branch
-        pc += 2 * combineNibbles(opCode2, opCode3);
+        pc += 2U * combineNibbles(opCode2, opCode3);
         break;
       }
       case 0x9: {  // branch if equal
         checkRegisters({opCode1}, pc);
-        if (registers[opCode1] == 0) pc += 2 * combineNibbles(opCode2, opCode3);
+        if (registers[opCode1] == 0)
+          pc += 2U * combineNibbles(opCode2, opCode3);
         break;
       }
       case 0xa: {  // branch if greater
         checkRegisters({opCode1}, pc);
-        if (registers[opCode1] > 0) pc += 2 * combineNibbles(opCode2, opCode3);
+        if (registers[opCode1] > 0) pc += 2U * combineNibbles(opCode2, opCode3);
         break;
       }
       case 0xb: {  // unconditional jump
-        pc = ram.getn(pc);
+        pc = static_cast<uint32_t>(ram.getn(pc));
         break;
       }
       case 0xc: {  // jump indirect
         checkRegisters({opCode1}, pc);
-        pc = registers[opCode1] + 2 * combineNibbles(opCode2, opCode3);
+        pc = static_cast<uint32_t>(registers[opCode1]) +
+             2U * combineNibbles(opCode2, opCode3);
         break;
       }
       case 0xd: {  // jump double indirect, base plus offset
         checkRegisters({opCode1}, pc);
-        pc = ram.get(combineNibbles(opCode2, opCode3) + registers[opCode1]);
+        pc = ram.get(combineNibbles(opCode2, opCode3) +
+                     static_cast<uint32_t>(registers[opCode1]));
         break;
       }
       case 0xe: {  // jump double indirect, indexed
         checkRegisters({opCode1, opCode2}, pc);
-        pc = ram.get(4 * registers[opCode1] + registers[opCode2]);
+        pc = ram.get(4U * static_cast<uint32_t>(registers[opCode1]) +
+                     static_cast<uint32_t>(registers[opCode2]));
         break;
       }
       case 0xf: {  // nop and halt
@@ -185,7 +193,7 @@ void run(Memory& ram) {
   }
 }
 
-void checkRegisters(initializer_list<uint8_t> registers, int32_t currPC) {
+void checkRegisters(initializer_list<uint8_t> registers, uint32_t currPC) {
   for (uint8_t iter : registers) {
     if (iter > 7) throw IllegalInstruction(currPC - 2);
   }

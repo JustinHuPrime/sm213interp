@@ -31,7 +31,7 @@ using std::string;
 
 class Segfault : public exception {
  public:
-  Segfault(int32_t attemptLocation) noexcept;
+  Segfault(uint32_t attemptLocation) noexcept;
   const char* what() const noexcept override;
 
  private:
@@ -40,20 +40,20 @@ class Segfault : public exception {
 
 class Memory {
  public:
-  explicit Memory(int32_t size) noexcept;
+  explicit Memory(uint32_t size) noexcept;
   ~Memory() noexcept;
 
-  uint8_t get(int32_t);
-  void set(uint8_t data, int32_t location);
-  int32_t getn(int32_t);
-  void setn(int32_t data, int32_t location);
+  uint8_t get(uint32_t);
+  void set(uint8_t data, uint32_t location);
+  int32_t getn(uint32_t);
+  void setn(int32_t data, uint32_t location);
 
-  int32_t size() const noexcept;
+  uint32_t size() const noexcept;
   const char* c_str_rep() const noexcept;
 
  private:
   uint8_t* arena;
-  int32_t arenaSize;
+  uint32_t arenaSize;
 };
 }  // namespace sm213common::model
 

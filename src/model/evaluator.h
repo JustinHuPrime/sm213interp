@@ -32,7 +32,7 @@ using std::string;
 
 class IllegalInstruction : public exception {
  public:
-  IllegalInstruction(int32_t addr) noexcept;
+  IllegalInstruction(uint32_t addr) noexcept;
   const char* what() const noexcept override;
 
  protected:
@@ -41,7 +41,7 @@ class IllegalInstruction : public exception {
 
 void run(Memory& ram);
 
-void checkRegisters(initializer_list<uint8_t>, int32_t);
+void checkRegisters(initializer_list<uint8_t>, uint32_t);
 uint8_t combineNibbles(uint8_t, uint8_t) noexcept;
 }  // namespace sm213interp::model
 

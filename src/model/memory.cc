@@ -26,34 +26,34 @@ using std::max;
 using std::to_string;
 }  // namespace
 
-Segfault::Segfault(int32_t attemptLocation) noexcept
+Segfault::Segfault(uint32_t attemptLocation) noexcept
     : msg{"Invalid access to location " + to_string(attemptLocation) + "."} {}
 const char* Segfault::what() const noexcept { return msg.c_str(); }
 
-Memory::Memory(int32_t size) noexcept
+Memory::Memory(uint32_t size) noexcept
     : arena{new uint8_t[size]}, arenaSize{size} {}
 Memory::~Memory() noexcept { delete[] arena; }
 
-uint8_t Memory::get(int32_t location) {
+uint8_t Memory::get(uint32_t location) {
   if (location >= arenaSize)
     throw Segfault(location);
   else
     return arena[location];
 }
-void Memory::set(uint8_t data, int32_t location) {
+void Memory::set(uint8_t data, uint32_t location) {
   if (location >= arenaSize)
     throw Segfault(location);
   else
     arena[location] = data;
 }
-int32_t Memory::getn(int32_t location) {
+int32_t Memory::getn(uint32_t location) {
   if (location + 4 >= arenaSize)
     throw Segfault(location);
   else
     return arena[location + 0] * 0x1000000 + arena[location + 1] * 0x10000 +
            arena[location + 2] * 0x100 + arena[location + 3] * 0x1;
 }
-void Memory::setn(int32_t data, int32_t location) {
+void Memory::setn(int32_t data, uint32_t location) {
   if (location + 4 >= arenaSize) {
     throw Segfault(location);
   } else {
@@ -64,7 +64,7 @@ void Memory::setn(int32_t data, int32_t location) {
   }
 }
 
-int32_t Memory::size() const noexcept { return arenaSize; }
+uint32_t Memory::size() const noexcept { return arenaSize; }
 
 const char* Memory::c_str_rep() const noexcept {
   return reinterpret_cast<char*>(arena);
