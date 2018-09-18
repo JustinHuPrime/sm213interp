@@ -39,7 +39,7 @@ class IllegalInstruction : public exception {
   string msg;
 };
 
-void run(Memory& ram);
+void run(Memory& ram, uint32_t);
 
 void checkRegisters(initializer_list<uint8_t>, uint32_t);
 uint8_t combineNibbles(uint8_t, uint8_t) noexcept;

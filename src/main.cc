@@ -42,13 +42,13 @@ using std::string;
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  if (argc != 2) {
-    cerr << "Expected memory size (in bytes) as only argument.\n";
+  if (argc != 3) {
+    cerr << "Expected memory size (in bytes) and starting pc as arguments.\n";
     return EXIT_FAILURE;
   }
 
   unsigned long buffer;
-  uint32_t memsize;
+  uint32_t memsize, startingPc;
 
   try {
     buffer = stoul(string(argv[1]));
@@ -57,6 +57,16 @@ int main(int argc, char* argv[]) {
   } catch (const invalid_argument&) {
     cerr << "Expected memory size to be a valid and positive integer. Found `"
          << argv[1] << "` instead.\n";
+    return EXIT_FAILURE;
+  }
+
+  try {
+    buffer = stoul(string(argv[2]));
+    if (memsize > numeric_limits<uint32_t>().max()) throw invalid_argument("");
+    startingPc = static_cast<uint32_t>(buffer);
+  } catch (const invalid_argument&) {
+    cerr << "Expected starting pc to be a valid and positive integer. Found "
+         << argv[2] << " instead.\n";
     return EXIT_FAILURE;
   }
 
@@ -69,7 +79,7 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
   try {
-    run(ram);
+    run(ram, startingPc);
   } catch (const Segfault& e) {
     cerr << e.what() << "\n";
   }

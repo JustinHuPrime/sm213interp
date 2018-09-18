@@ -35,8 +35,7 @@ IllegalInstruction::IllegalInstruction(uint32_t addr) noexcept {
 }
 const char* IllegalInstruction::what() const noexcept { return msg.c_str(); }
 
-void run(Memory& ram) {
-  uint32_t pc = 0;
+void run(Memory& ram, uint32_t pc) {
   array<int32_t, 8> registers;
 
   while (true) {
