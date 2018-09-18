@@ -55,8 +55,8 @@ int main(int argc, char* argv[]) {
     if (memsize > numeric_limits<uint32_t>().max()) throw invalid_argument("");
     memsize = static_cast<uint32_t>(buffer);
   } catch (const invalid_argument&) {
-    cerr << "Expected memory size to be a valid and positive integer. Found `"
-         << argv[1] << "` instead.\n";
+    cerr << "Expected memory size to be a valid and positive integer. Found '"
+         << argv[1] << "' instead.\n";
     return EXIT_FAILURE;
   }
 
@@ -65,8 +65,8 @@ int main(int argc, char* argv[]) {
     if (memsize > numeric_limits<uint32_t>().max()) throw invalid_argument("");
     startingPc = static_cast<uint32_t>(buffer);
   } catch (const invalid_argument&) {
-    cerr << "Expected starting pc to be a valid and positive integer. Found "
-         << argv[2] << " instead.\n";
+    cerr << "Expected starting pc to be a valid and positive integer. Found '"
+         << argv[2] << "' instead.\n";
     return EXIT_FAILURE;
   }
 

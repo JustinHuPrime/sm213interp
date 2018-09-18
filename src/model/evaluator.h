@@ -40,9 +40,6 @@ class IllegalInstruction : public exception {
 };
 
 void run(Memory& ram, uint32_t);
-
-void checkRegisters(initializer_list<uint8_t>, uint32_t);
-uint8_t combineNibbles(uint8_t, uint8_t) noexcept;
 }  // namespace sm213interp::model
 
 #endif  // SM213INTERP_MODEL_EVALUATOR_H_

@@ -25,6 +25,20 @@ namespace {
 using std::array;
 using std::stringstream;
 using std::to_string;
+
+void checkRegisters(initializer_list<uint8_t> registers, uint32_t currPC) {
+  for (uint8_t iter : registers) {
+    if (iter > 7) throw IllegalInstruction(currPC - 2);
+  }
+}
+
+uint8_t combineNibbles(uint8_t nibble1, uint8_t nibble2) noexcept {
+  uint8_t temp = 0;
+  temp |= nibble1;
+  temp <<= 4;
+  temp |= nibble2;
+  return temp;
+}
 }  // namespace
 
 IllegalInstruction::IllegalInstruction(uint32_t addr) noexcept {
@@ -190,19 +204,5 @@ void run(Memory& ram, uint32_t pc) {
       default: { abort(); }  // something is horribly wrong!
     }
   }
-}
-
-void checkRegisters(initializer_list<uint8_t> registers, uint32_t currPC) {
-  for (uint8_t iter : registers) {
-    if (iter > 7) throw IllegalInstruction(currPC - 2);
-  }
-}
-
-uint8_t combineNibbles(uint8_t nibble1, uint8_t nibble2) noexcept {
-  uint8_t temp = 0;
-  temp |= nibble1;
-  temp <<= 4;
-  temp |= nibble2;
-  return temp;
 }
 }  // namespace sm213interp::model
