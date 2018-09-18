@@ -130,7 +130,12 @@ void run(Memory& ram) {
       }
       case 0x7: {  // shift
         checkRegisters({opCode1}, pc);
-        registers[opCode1] <<= combineNibbles(opCode2, opCode3);
+        int8_t shiftAmount =
+            static_cast<int8_t>(combineNibbles(opCode2, opCode3));
+        if (shiftAmount < 0)
+          registers[opCode1] >>= -shiftAmount;
+        else
+          registers[opCode1] <<= shiftAmount;
         break;
       }
       case 0x8: {  // branch
