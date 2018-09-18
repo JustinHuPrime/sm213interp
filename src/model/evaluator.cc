@@ -161,17 +161,17 @@ void run(Memory& ram) {
         pc = registers[opCode1] + 2 * combineNibbles(opCode2, opCode3);
         break;
       }
-      case 0xd: {
+      case 0xd: {  // jump double indirect, base plus offset
         checkRegisters({opCode1}, pc);
         pc = ram.get(combineNibbles(opCode2, opCode3) + registers[opCode1]);
         break;
       }
-      case 0xe: {
+      case 0xe: {  // jump double indirect, indexed
         checkRegisters({opCode1, opCode2}, pc);
         pc = ram.get(4 * registers[opCode1] + registers[opCode2]);
         break;
       }
-      case 0xf: {
+      case 0xf: {  // nop and halt
         if (opCode2 != 0 || opCode3 != 0) throw IllegalInstruction(pc - 2);
         if (opCode1 == 0x0)  // halt
           return;
