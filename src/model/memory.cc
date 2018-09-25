@@ -17,17 +17,22 @@
 
 #include "model/memory.h"
 
+#include <sstream>
 #include <stdexcept>
 
 namespace sm213common::model {
 namespace {
 using std::invalid_argument;
 using std::max;
+using std::stringstream;
 using std::to_string;
 }  // namespace
 
-Segfault::Segfault(uint32_t attemptLocation) noexcept
-    : msg{"Invalid access to location " + to_string(attemptLocation) + "."} {}
+Segfault::Segfault(uint32_t attemptLocation) noexcept {
+  stringstream ss;
+  ss << "Invalid access to location 0x" << std::hex << attemptLocation << ".";
+  msg = ss.str();
+}
 const char* Segfault::what() const noexcept { return msg.c_str(); }
 
 Memory::Memory(uint32_t size) noexcept

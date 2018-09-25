@@ -51,8 +51,11 @@ int main(int argc, char* argv[]) {
   uint32_t memsize, startingPc;
 
   try {
-    buffer = stoul(string(argv[1]));
-    if (memsize > numeric_limits<uint32_t>().max()) throw invalid_argument("");
+    size_t eidx;
+    buffer = stoul(string(argv[1]), &eidx, 0);
+    if (memsize > numeric_limits<uint32_t>().max() ||
+        eidx != string(argv[1]).length())
+      throw invalid_argument("");
     memsize = static_cast<uint32_t>(buffer);
   } catch (const invalid_argument&) {
     cerr << "Expected memory size to be a valid and positive integer. Found '"
@@ -61,8 +64,11 @@ int main(int argc, char* argv[]) {
   }
 
   try {
-    buffer = stoul(string(argv[2]));
-    if (memsize > numeric_limits<uint32_t>().max()) throw invalid_argument("");
+    size_t eidx;
+    buffer = stoul(string(argv[2]), &eidx, 0);
+    if (memsize > numeric_limits<uint32_t>().max() ||
+        eidx != string(argv[2]).length())
+      throw invalid_argument("");
     startingPc = static_cast<uint32_t>(buffer);
   } catch (const invalid_argument&) {
     cerr << "Expected starting pc to be a valid and positive integer. Found '"
