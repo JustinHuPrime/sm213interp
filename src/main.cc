@@ -20,7 +20,7 @@
 // standard input, passed through the assembler into machine code (in simulated
 // memory), then executed.
 
-#include "io/io.h"
+#include "io.h"
 #include "model/evaluator.h"
 #include "model/memory.h"
 
@@ -29,11 +29,12 @@
 #include <stdexcept>
 
 namespace {
-using sm213common::model::Memory;
-using sm213common::model::Segfault;
 using sm213interp::io::dump;
+using sm213interp::io::FileOpenError;
 using sm213interp::io::read;
+using sm213interp::model::Memory;
 using sm213interp::model::run;
+using sm213interp::model::Segfault;
 using std::cerr;
 using std::invalid_argument;
 using std::numeric_limits;
@@ -43,18 +44,26 @@ using std::string;
 
 int main(int argc, char* argv[]) {
   if (argc != 3) {
-    cerr << "Expected memory size (in bytes) and starting pc as arguments.\n";
+    cerr << "Expected input file name, memory size (bytes), and starting pc as "
+            "arguments.\n";
     return EXIT_FAILURE;
   }
 
   unsigned long buffer;
   uint32_t memsize, startingPc;
+  string inFileName = string(argv[1]);
+  string outFileName = inFileName;
+  if (outFileName.find_last_of('.') == string::npos)
+    outFileName += ".out.img";
+  else
+    outFileName.replace(outFileName.find_last_of('.'), outFileName.size(),
+                        ".out.img");
 
   try {
     size_t eidx;
-    buffer = stoul(string(argv[1]), &eidx, 0);
+    buffer = stoul(string(argv[2]), &eidx, 0);
     if (memsize > numeric_limits<uint32_t>().max() ||
-        eidx != string(argv[1]).length())
+        eidx != string(argv[2]).length())
       throw invalid_argument("");
     memsize = static_cast<uint32_t>(buffer);
   } catch (const invalid_argument&) {
@@ -65,9 +74,9 @@ int main(int argc, char* argv[]) {
 
   try {
     size_t eidx;
-    buffer = stoul(string(argv[2]), &eidx, 0);
+    buffer = stoul(string(argv[3]), &eidx, 0);
     if (memsize > numeric_limits<uint32_t>().max() ||
-        eidx != string(argv[2]).length())
+        eidx != string(argv[3]).length())
       throw invalid_argument("");
     startingPc = static_cast<uint32_t>(buffer);
   } catch (const invalid_argument&) {
@@ -79,9 +88,12 @@ int main(int argc, char* argv[]) {
   Memory ram(memsize);
 
   try {
-    read(ram);
+    read(ram, inFileName);
   } catch (const Segfault&) {
     cerr << "Input too long - out of memory.\n";
+    return EXIT_FAILURE;
+  } catch (const FileOpenError&) {
+    cerr << "Could not open input file.\n";
     return EXIT_FAILURE;
   }
   try {
@@ -89,7 +101,12 @@ int main(int argc, char* argv[]) {
   } catch (const Segfault& e) {
     cerr << e.what() << "\n";
   }
-  dump(ram);
+  try {
+    dump(ram, outFileName);
+  } catch (const FileOpenError&) {
+    cerr << "Could not open output file.\n";
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }

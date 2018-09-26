@@ -24,7 +24,7 @@
 
 namespace sm213interp::model {
 namespace {
-using sm213common::model::Memory;
+using sm213interp::model::Memory;
 using std::exception;
 using std::initializer_list;
 using std::string;

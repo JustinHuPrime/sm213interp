@@ -23,7 +23,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace sm213common::model {
+namespace sm213interp::model {
 namespace {
 using std::exception;
 using std::string;
@@ -55,6 +55,6 @@ class Memory {
   uint8_t* arena;
   uint32_t arenaSize;
 };
-}  // namespace sm213common::model
+}  // namespace sm213interp::model
 
 #endif  // SM213COMMON_MODEL_MEMORY_H_

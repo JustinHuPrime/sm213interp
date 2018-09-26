@@ -20,7 +20,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace sm213common::model {
+namespace sm213interp::model {
 namespace {
 using std::invalid_argument;
 using std::max;
@@ -74,4 +74,4 @@ uint32_t Memory::size() const noexcept { return arenaSize; }
 const char* Memory::c_str_rep() const noexcept {
   return reinterpret_cast<char*>(arena);
 }
-}  // namespace sm213common::model
+}  // namespace sm213interp::model
