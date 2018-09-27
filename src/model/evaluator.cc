@@ -32,12 +32,12 @@ void checkRegisters(initializer_list<uint8_t> registers, uint32_t currPC) {
   }
 }
 
-uint8_t combineNibbles(uint8_t nibble1, uint8_t nibble2) noexcept {
+int8_t combineNibbles(uint8_t nibble1, uint8_t nibble2) noexcept {
   uint8_t temp = 0;
   temp |= nibble1;
   temp <<= 4;
   temp |= nibble2;
-  return temp;
+  return static_cast<int8_t>(temp);
 }
 }  // namespace
 
@@ -50,7 +50,7 @@ IllegalInstruction::IllegalInstruction(uint32_t addr) noexcept {
 const char* IllegalInstruction::what() const noexcept { return msg.c_str(); }
 
 void run(Memory& ram, uint32_t pc) {
-  array<int32_t, 8> registers;
+  array<uint32_t, 8> registers;
 
   while (true) {
     uint16_t opCode = ram.get(pc++);
@@ -72,28 +72,24 @@ void run(Memory& ram, uint32_t pc) {
       }
       case 0x1: {  // load base+offset
         checkRegisters({opCode2, opCode3}, pc);
-        registers[opCode3] =
-            ram.getn(opCode1 * 4U + static_cast<uint32_t>(registers[opCode2]));
+        registers[opCode3] = ram.getn(opCode1 * 4U + registers[opCode2]);
         break;
       }
       case 0x2: {  // load indexed
         checkRegisters({opCode1, opCode2, opCode3}, pc);
         registers[opCode3] =
-            ram.getn(static_cast<uint32_t>(registers[opCode1]) +
-                     static_cast<uint32_t>(registers[opCode2]) * 4U);
+            ram.getn(registers[opCode1] + registers[opCode2]) * 4U;
         break;
       }
       case 0x3: {  // store base + offset
         checkRegisters({opCode1, opCode3}, pc);
-        ram.setn(registers[opCode1],
-                 opCode2 * 4U + static_cast<uint32_t>(registers[opCode3]));
+        ram.setn(registers[opCode1], opCode2 * 4U + registers[opCode3]);
         break;
       }
       case 0x4: {  // store indexed
         checkRegisters({opCode1, opCode2, opCode3}, pc);
         ram.setn(registers[opCode1],
-                 static_cast<uint32_t>(registers[opCode2]) +
-                     static_cast<uint32_t>(registers[opCode3]) * 4U);
+                 registers[opCode2] + registers[opCode3] * 4U);
         break;
       }
       case 0x5: {  // nothing starts with 5!
@@ -138,7 +134,7 @@ void run(Memory& ram, uint32_t pc) {
             break;
           }
           case 0xf: {  // get pc
-            registers[opCode3] = static_cast<int32_t>(pc + 2U * opCode2);
+            registers[opCode3] = pc + 2U * opCode2;
             break;
           }
           default: { throw IllegalInstruction(pc - 2); }
@@ -147,8 +143,7 @@ void run(Memory& ram, uint32_t pc) {
       }
       case 0x7: {  // shift
         checkRegisters({opCode1}, pc);
-        int8_t shiftAmount =
-            static_cast<int8_t>(combineNibbles(opCode2, opCode3));
+        int8_t shiftAmount = combineNibbles(opCode2, opCode3);
         if (shiftAmount < 0)
           registers[opCode1] >>= -shiftAmount;
         else
@@ -156,40 +151,40 @@ void run(Memory& ram, uint32_t pc) {
         break;
       }
       case 0x8: {  // branch
-        pc += 2U * combineNibbles(opCode2, opCode3);
+        pc += 2U * static_cast<uint8_t>(combineNibbles(opCode2, opCode3));
         break;
       }
       case 0x9: {  // branch if equal
         checkRegisters({opCode1}, pc);
         if (registers[opCode1] == 0)
-          pc += 2U * combineNibbles(opCode2, opCode3);
+          pc += 2U * static_cast<uint8_t>(combineNibbles(opCode2, opCode3));
         break;
       }
       case 0xa: {  // branch if greater
         checkRegisters({opCode1}, pc);
-        if (registers[opCode1] > 0) pc += 2U * combineNibbles(opCode2, opCode3);
+        if (registers[opCode1] > 0)
+          pc += 2U * static_cast<uint8_t>(combineNibbles(opCode2, opCode3));
         break;
       }
       case 0xb: {  // unconditional jump
-        pc = static_cast<uint32_t>(ram.getn(pc));
+        pc = ram.getn(pc);
         break;
       }
       case 0xc: {  // jump indirect
         checkRegisters({opCode1}, pc);
-        pc = static_cast<uint32_t>(registers[opCode1]) +
-             2U * combineNibbles(opCode2, opCode3);
+        pc = registers[opCode1] +
+             2U * static_cast<uint8_t>(combineNibbles(opCode2, opCode3));
         break;
       }
       case 0xd: {  // jump double indirect, base plus offset
         checkRegisters({opCode1}, pc);
-        pc = ram.get(combineNibbles(opCode2, opCode3) +
-                     static_cast<uint32_t>(registers[opCode1]));
+        pc = ram.get(static_cast<uint8_t>(combineNibbles(opCode2, opCode3)) +
+                     registers[opCode1]);
         break;
       }
       case 0xe: {  // jump double indirect, indexed
         checkRegisters({opCode1, opCode2}, pc);
-        pc = ram.get(4U * static_cast<uint32_t>(registers[opCode1]) +
-                     static_cast<uint32_t>(registers[opCode2]));
+        pc = ram.get(4U * registers[opCode1] + registers[opCode2]);
         break;
       }
       case 0xf: {  // nop and halt

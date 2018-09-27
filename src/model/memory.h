@@ -45,8 +45,8 @@ class Memory {
 
   uint8_t get(uint32_t);
   void set(uint8_t data, uint32_t location);
-  int32_t getn(uint32_t);
-  void setn(int32_t data, uint32_t location);
+  uint32_t getn(uint32_t);
+  void setn(uint32_t data, uint32_t location);
 
   uint32_t size() const noexcept;
   const char* c_str_rep() const noexcept;

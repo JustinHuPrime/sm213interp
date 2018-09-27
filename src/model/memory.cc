@@ -51,14 +51,14 @@ void Memory::set(uint8_t data, uint32_t location) {
   else
     arena[location] = data;
 }
-int32_t Memory::getn(uint32_t location) {
+uint32_t Memory::getn(uint32_t location) {
   if (location + 4 >= arenaSize)
     throw Segfault(location);
   else
     return arena[location + 0] * 0x1000000 + arena[location + 1] * 0x10000 +
            arena[location + 2] * 0x100 + arena[location + 3] * 0x1;
 }
-void Memory::setn(int32_t data, uint32_t location) {
+void Memory::setn(uint32_t data, uint32_t location) {
   if (location + 4 >= arenaSize) {
     throw Segfault(location);
   } else {
