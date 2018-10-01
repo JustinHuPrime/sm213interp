@@ -33,6 +33,9 @@ using std::string;
 class FileOpenError : public exception {
  public:
   FileOpenError() noexcept = default;
+  FileOpenError(const FileOpenError&) noexcept = default;
+  FileOpenError& operator=(const FileOpenError&) noexcept = default;
+
   const char* what() const noexcept override;
 };
 

@@ -32,7 +32,10 @@ using std::string;
 
 class IllegalInstruction : public exception {
  public:
-  IllegalInstruction(uint32_t addr) noexcept;
+  explicit IllegalInstruction(uint32_t addr) noexcept;
+  IllegalInstruction(const IllegalInstruction&) noexcept = default;
+  IllegalInstruction& operator=(const IllegalInstruction&) noexcept = default;
+
   const char* what() const noexcept override;
 
  protected:

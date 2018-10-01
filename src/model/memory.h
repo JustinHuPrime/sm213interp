@@ -31,7 +31,10 @@ using std::string;
 
 class Segfault : public exception {
  public:
-  Segfault(uint32_t attemptLocation) noexcept;
+  explicit Segfault(uint32_t attemptLocation) noexcept;
+  Segfault(const Segfault&) noexcept = default;
+  Segfault& operator=(const Segfault&) noexcept = default;
+
   const char* what() const noexcept override;
 
  private:
@@ -41,7 +44,11 @@ class Segfault : public exception {
 class Memory {
  public:
   explicit Memory(uint32_t size) noexcept;
+  Memory(Memory&&) noexcept = default;
+
   ~Memory() noexcept;
+
+  Memory& operator=(Memory&&) noexcept = default;
 
   uint8_t get(uint32_t);
   void set(uint8_t data, uint32_t location);

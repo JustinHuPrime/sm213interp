@@ -55,8 +55,10 @@ uint32_t Memory::getn(uint32_t location) {
   if (location + 4 >= arenaSize)
     throw Segfault(location);
   else
-    return arena[location + 0] * 0x1000000 + arena[location + 1] * 0x10000 +
-           arena[location + 2] * 0x100 + arena[location + 3] * 0x1;
+    return (static_cast<uint32_t>(arena[location + 0]) << (3 * 8)) +
+           (static_cast<uint32_t>(arena[location + 1]) << (2 * 8)) +
+           (static_cast<uint32_t>(arena[location + 2]) << (1 * 8)) +
+           (static_cast<uint32_t>(arena[location + 3]) << (0 * 8));
 }
 void Memory::setn(uint32_t data, uint32_t location) {
   if (location + 4 >= arenaSize) {
