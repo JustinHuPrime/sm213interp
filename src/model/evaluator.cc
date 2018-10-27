@@ -178,8 +178,9 @@ void run(Memory& ram, uint32_t pc) {
       }
       case 0xd: {  // jump double indirect, base plus offset
         checkRegisters({opCode1}, pc);
-        pc = ram.get(static_cast<uint8_t>(combineNibbles(opCode2, opCode3)) +
-                     registers[opCode1]);
+        pc = ram.get(
+            4U * static_cast<uint8_t>(combineNibbles(opCode2, opCode3)) +
+            registers[opCode1]);
         break;
       }
       case 0xe: {  // jump double indirect, indexed
